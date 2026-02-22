@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Momentum Pixel Demo</title>
+  <style>
+    :root{
+      --bg:#05070c;
+      --panel:#0b1020;
+      --panel2:#080b14;
+      --ink:#e9f1ff;
+      --muted:#97a7c2;
+      --cyan:#5ff7ff;
+      --violet:#c07bff;
+      --green:#66ffb3;
+      --red:#ff4d7d;
+      --px: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--px);
+      color:var(--ink);
+      background:
+        radial-gradient(900px 520px at 20% 18%, rgba(192,123,255,.18), transparent 55%),
+        radial-gradient(900px 520px at 80% 70%, rgba(95,247,255,.14), transparent 60%),
+        linear-gradient(180deg, #04050a, #060815);
+      image-rendering: pixelated;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    /* Pixel frame */
+    .app{
+      width:min(1050px, 100%);
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(11,16,32,.92), rgba(6,8,14,.92));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 90px rgba(0,0,0,.55);
+      overflow:hidden;
+      position:relative;
+    }
+    .app:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, transparent 1px 6px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.02) 0 1px, transparent 1px 7px);
+      opacity:.14;
+      pointer-events:none;
+      mix-blend-mode: overlay;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 14px 10px 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+      position:relative;
+      z-index:1;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .title h1{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+    }
+    .title .sub{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.3;
+      max-width:760px;
+    }
+
+    .topBtns{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    button{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      color:var(--ink);
+      font-family:var(--px);
+      font-size:11px;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      transition: transform .08s ease, background .18s ease, border-color .18s ease;
+    }
+    button:hover{ background:rgba(255,255,255,.09); }
+    button:active{ transform: translateY(1px); }
+    .primary{
+      border-color: rgba(95,247,255,.24);
+      background: linear-gradient(90deg, rgba(95,247,255,.14), rgba(192,123,255,.14));
+    }
+
+    main{
+      display:grid;
+      grid-template-columns: 1.08fr 1fr;
+      gap:14px;
+      padding:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .left, .right{
+      border-radius:16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.28);
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .left:before, .right:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(600px 280px at 50% 20%, rgba(95,247,255,.10), transparent 60%),
+        radial-gradient(600px 280px at 50% 85%, rgba(192,123,255,.10), transparent 60%);
+      opacity:.65;
+      pointer-events:none;
+    }
+
+    .grid{
+      display:grid;
+      gap:12px;
+      position:relative;
+      z-index:1;
+    }
+
+    .field{
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:12px;
+    }
+    .fieldLabel{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:var(--muted);
+      font-size:11px;
+      margin-bottom:8px;
+      text-transform:uppercase;
+      letter-spacing:.5px;
+    }
+    .field input{
+      width:100%;
+      font-family:var(--px);
+      font-size:22px;
+      padding:14px 14px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      outline:none;
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+    }
+    .field input:focus{
+      border-color: rgba(95,247,255,.35);
+      box-shadow: 0 0 0 3px rgba(95,247,255,.10);
+    }
+
+    .help{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.4;
+      margin-top:4px;
+    }
+
+    .readouts{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+      position:relative;
+      z-index:1;
+    }
+    .chip{
+      background: rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .chip b{
+      color:var(--ink);
+      font-size:14px;
+      letter-spacing:.3px;
+    }
+
+    .note{
+      margin-top:10px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.4;
+      position:relative;
+      z-index:1;
+    }
+
+    /* Right side */
+    .canvasWrap{
+      position:relative;
+      z-index:1;
+      display:grid;
+      place-items:center;
+      height: 100%;
+      min-height: 360px;
+    }
+    canvas{
+      width:min(520px, 100%);
+      height:auto;
+      border-radius:16px;
+      background: radial-gradient(420px 240px at 50% 35%, rgba(255,255,255,.04), rgba(0,0,0,.18));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.25);
+      image-rendering: pixelated;
+    }
+
+    /* Overlay: browser autoplay rules mean audio needs a click */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background: rgba(0,0,0,.58);
+      backdrop-filter: blur(4px);
+      z-index:50;
+      padding:18px;
+    }
+    .overlayCard{
+      width:min(640px, 100%);
+      border-radius:18px;
+      background: linear-gradient(180deg, rgba(11,16,32,.95), rgba(6,8,14,.95));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 20px 90px rgba(0,0,0,.70);
+      padding:16px;
+    }
+    .overlayCard h2{
+      margin:0 0 10px 0;
+      font-size:14px;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+    }
+    .overlayCard p{
+      margin:0 0 12px 0;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+    }
+    .overlayBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 960px){
+      main{ grid-template-columns: 1fr; }
+      .readouts{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay" id="overlay">
+    <div class="overlayCard">
+      <h2>Start Demo</h2>
+      <p>
+        Chrome blocks autoplay audio until you click. Hit <b>Start</b> to enable the retro synth soundtrack.
+        The ball speed shows momentum. If any input is <b>0</b>, momentum becomes <b>0</b> and the ball stops.
+      </p>
+      <div class="overlayBtns">
+        <button class="primary" id="startBtn">Start (Audio + Animation)</button>
+        <button id="muteBtn">Start Muted</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <header>
+      <div class="title">
+        <h1>Momentum — Pixel HUD</h1>
+        <div class="sub">
+          Type 0–10 for Energy, Willpower, Concentration. Momentum = Energy × Willpower × Concentration (normalized) → %.
+          Ball spins faster with higher momentum. In Quadrant 2 (sunrise) low momentum “struggles” (slows + jitters), but keeps moving unless any value is 0.
+        </div>
+      </div>
+
+      <div class="topBtns">
+        <button id="randomBtn">Random</button>
+        <button id="maxBtn" class="primary">10 / 10 / 10</button>
+        <button id="zeroBtn">Zero One Input</button>
+        <button id="audioToggleBtn">Audio: Off</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="left">
+        <div class="grid">
+          <div class="field">
+            <div class="fieldLabel">
+              <span>Energy (0–10)</span>
+              <span id="eShow">7</span>
+            </div>
+            <input id="energy" type="number" min="0" max="10" step="1" value="7" inputmode="numeric" />
+            <div class="help">Biological fuel (sleep, nervous system, nutrition). 0 kills momentum.</div>
+          </div>
+
+          <div class="field">
+            <div class="fieldLabel">
+              <span>Willpower (0–10)</span>
+              <span id="wShow">7</span>
+            </div>
+            <input id="willpower" type="number" min="0" max="10" step="1" value="7" inputmode="numeric" />
+            <div class="help">Directional force (override impulse). 0 kills momentum.</div>
+          </div>
+
+          <div class="field">
+            <div class="fieldLabel">
+              <span>Concentration (0–10)</span>
+              <span id="cShow">7</span>
+            </div>
+            <input id="concentration" type="number" min="0" max="10" step="1" value="7" inputmode="numeric" />
+            <div class="help">Amplifier (focus efficiency). 0 kills momentum.</div>
+          </div>
+
+          <div class="readouts">
+            <div class="chip"><span>Momentum</span><b id="momentumPct">—%</b></div>
+            <div class="chip"><span>Status</span><b id="status">—</b></div>
+            <div class="chip"><span>Spin Speed</span><b id="speedOut">—</b></div>
+            <div class="chip"><span>Q2 Struggle</span><b id="struggleOut">—</b></div>
+          </div>
+
+          <div class="note">
+            <b>Quadrants:</b> Q2 = Sunrise (top-left). Q1 = Sunset (top-right). Q4 = Deep Rest (bottom-right). Q3 = Morning (bottom-left).
+          </div>
+        </div>
+      </section>
+
+      <section class="right">
+        <div class="canvasWrap">
+          <canvas id="hud" width="700" height="420"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+(() => {
+  // =========================
+  // Helpers
+  // =========================
+  const $ = (id) => document.getElementById(id);
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+  const round = (n) => Math.round(n);
+
+  // Inputs
+  const energy = $("energy");
+  const willpower = $("willpower");
+  const concentration = $("concentration");
+  const eShow = $("eShow");
+  const wShow = $("wShow");
+  const cShow = $("cShow");
+
+  // Readouts
+  const momentumPct = $("momentumPct");
+  const statusEl = $("status");
+  const speedOut = $("speedOut");
+  const struggleOut = $("struggleOut");
+
+  // Buttons
+  const randomBtn = $("randomBtn");
+  const maxBtn = $("maxBtn");
+  const zeroBtn = $("zeroBtn");
+  const audioToggleBtn = $("audioToggleBtn");
+
+  // Overlay
+  const overlay = $("overlay");
+  const startBtn = $("startBtn");
+  const muteBtn = $("muteBtn");
+
+  // Canvas
+  const canvas = $("hud");
+  const ctx = canvas.getContext("2d");
+
+  // =========================
+  // Momentum model
+  // =========================
+  // User requirement: "doesn’t move if any values is zero"
+  // We'll allow 0..10.
+  // Normalize into [0,1], raw = e*w*c. Then scale to percentage.
+  // For nicer feel, apply gamma shaping but preserve zero behavior.
+  const gamma = 0.65;
+
+  function readInputs() {
+    const E = clamp(Number(energy.value), 0, 10);
+    const W = clamp(Number(willpower.value), 0, 10);
+    const C = clamp(Number(concentration.value), 0, 10);
+    if (!Number.isFinite(E)) return {E:0,W:0,C:0};
+    return { E, W, C };
+  }
+
+  function computeMomentum({E,W,C}) {
+    if (E === 0 || W === 0 || C === 0) return 0;
+    const e = E / 10, w = W / 10, c = C / 10;
+    const raw = e * w * c;               // 0..1
+    const shaped = Math.pow(raw, gamma); // 0..1
+    return clamp(100 * shaped, 0, 100);
+  }
+
+  // =========================
+  // Ball motion (spins around a ring)
+  // =========================
+  // Ball angular speed depends on momentum.
+  // Requirement: "struggling to go up in 2nd quadrant but constantly spinning"
+  // Interpretation:
+  // - If momentum > 0: always increases angle (always moving).
+  // - In Q2 (top-left), low momentum gets slowed + jittered.
+  // - High momentum (especially 100) looks like perfect smooth halo + fast ball.
+  //
+  // Quadrants by angle:
+  // We'll use angle where 0 at the RIGHT (standard canvas), increasing clockwise.
+  // Then:
+  // Q1 (top-right): angles 270..360 and 0..0? It's messy.
+  // Instead: use math angle with 0 at TOP and clockwise for clarity.
+  // We'll convert for drawing.
+  //
+  // We'll store angleTop = 0 at top, clockwise increases.
+  let angleTop = 0;         // radians, 0 = top
+  let lastT = performance.now();
+
+  // Pixel-style jitter
+  function randBetween(a,b){ return a + Math.random()*(b-a); }
+
+  function isInQ2(angleTopRad) {
+    // Q2 = top-left. With top-based angles:
+    // 0 (top) -> 90 (right) is Q1
+    // 90 -> 180 is Q4
+    // 180 -> 270 is Q3
+    // 270 -> 360 is Q2
+    let deg = (angleTopRad * 180 / Math.PI) % 360;
+    if (deg < 0) deg += 360;
+    return deg >= 270 && deg < 360;
+  }
+
+  function speedFromMomentum(m) {
+    // base speed in radians/sec
+    // m=0 -> 0
+    // m=100 -> fast
+    const x = m / 100;
+    // more gamified curve
+    return (x === 0) ? 0 : (0.6 + 6.2 * Math.pow(x, 1.55));
+  }
+
+  // =========================
+  // Drawing (pixel HUD)
+  // =========================
+  function clear() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  function pixelText(text, x, y, size=16, color="rgba(233,241,255,.92)") {
+    ctx.fillStyle = color;
+    ctx.font = `${size}px ui-monospace, Menlo, Consolas, monospace`;
+    ctx.textBaseline = "top";
+    ctx.fillText(text, x, y);
+  }
+
+  function drawPanel() {
+    // background
+    ctx.fillStyle = "rgba(0,0,0,.22)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    // subtle grid
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = "rgba(255,255,255,.10)";
+    ctx.lineWidth = 1;
+    for (let x=0; x<canvas.width; x+=14){
+      ctx.beginPath();
+      ctx.moveTo(x,0); ctx.lineTo(x,canvas.height);
+      ctx.stroke();
+    }
+    for (let y=0; y<canvas.height; y+=14){
+      ctx.beginPath();
+      ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    // top label bar
+    ctx.fillStyle = "rgba(255,255,255,.05)";
+    ctx.fillRect(0,0,canvas.width,44);
+    pixelText("MOMENTUM RING // PIXEL HUD", 16, 12, 14, "rgba(233,241,255,.85)");
+  }
+
+  function drawRing(m) {
+    const w = canvas.width, h = canvas.height;
+
+    // ring center & radius
+    const cx = Math.floor(w*0.60);
+    const cy = Math.floor(h*0.56);
+    const R  = Math.floor(Math.min(w,h)*0.30);
+    const thickness = 18;
+
+    // ring base
+    ctx.strokeStyle = "rgba(255,255,255,.15)";
+    ctx.lineWidth = thickness;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI*2);
+    ctx.stroke();
+
+    // quadrant crosshair
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.beginPath(); ctx.moveTo(cx-R-18, cy); ctx.lineTo(cx+R+18, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy-R-18); ctx.lineTo(cx, cy+R+18); ctx.stroke();
+
+    // labels (small)
+    pixelText("Q2 SUNRISE", cx - R - 8, cy - R - 6, 12, "rgba(151,167,194,.9)");
+    pixelText("Q1 SUNSET",  cx + 10,     cy - R - 6, 12, "rgba(151,167,194,.9)");
+    pixelText("Q3 MORNING", cx - R - 8,   cy + R - 10, 12, "rgba(151,167,194,.9)");
+    pixelText("Q4 REST",    cx + 10,      cy + R - 10, 12, "rgba(151,167,194,.9)");
+
+    // momentum arc fill (visual)
+    // Use top-based angle for "start at top"
+    const pct = clamp(m, 0, 100);
+    const arcLen = (Math.PI*2) * (pct/100);
+
+    // Color shifts with momentum
+    const color = (pct >= 100)
+      ? "rgba(102,255,179,.95)"
+      : (pct >= 70)
+        ? "rgba(95,247,255,.85)"
+        : (pct >= 40)
+          ? "rgba(192,123,255,.78)"
+          : "rgba(255,77,125,.78)";
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = thickness;
+
+    if (pct > 0.2) {
+      // convert top-based to canvas angle:
+      // canvas arc: 0 rad at right, CCW. We want 0 at top, clockwise.
+      // So: canvasAngle = (-topAngle + PI/2)
+      const startTop = 0;
+      const endTop   = arcLen; // clockwise in top-space
+      const startCanvas = Math.PI/2;
+      const endCanvas   = (Math.PI/2) - endTop; // because clockwise in top-space means negative in canvas space
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, startCanvas, endCanvas, true);
+      ctx.stroke();
+    }
+
+    // Perfect halo glow at 100
+    if (pct >= 100) {
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.strokeStyle = "rgba(102,255,179,.55)";
+      ctx.lineWidth = 6;
+      ctx.shadowColor = "rgba(102,255,179,.65)";
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R + 18, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Center text
+    const p = round(pct);
+    pixelText(`${p}%`, cx - 18, cy - 14, 26, "rgba(233,241,255,.92)");
+    pixelText("momentum", cx - 34, cy + 18, 12, "rgba(151,167,194,.95)");
+
+    return { cx, cy, R };
+  }
+
+  function drawBall(ring, m, struggling) {
+    const { cx, cy, R } = ring;
+
+    // Convert top-based angle (0 at top, clockwise) to canvas coords:
+    const a = angleTop; // radians
+    const x = cx + (R * Math.sin(a));
+    const y = cy - (R * Math.cos(a));
+
+    // ball pixel look
+    ctx.save();
+    const glow = (m >= 100) ? 18 : (m >= 70 ? 14 : 10);
+    const alpha = (m === 0) ? 0.35 : 0.95;
+
+    // glow
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = (m >= 100) ? "rgba(102,255,179,.75)" : "rgba(95,247,255,.55)";
+    ctx.shadowBlur = glow;
+
+    // draw ball (pixel-ish: 2 rectangles)
+    ctx.fillStyle = (m >= 100) ? "rgba(102,255,179,.95)" : "rgba(95,247,255,.90)";
+    ctx.fillRect(Math.round(x-4), Math.round(y-4), 8, 8);
+
+    // core
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = (struggling && m < 45) ? "rgba(255,77,125,.95)" : "rgba(233,241,255,.92)";
+    ctx.fillRect(Math.round(x-2), Math.round(y-2), 4, 4);
+
+    ctx.restore();
+  }
+
+  function drawFooter(m, speed, struggling, inputs) {
+    const y = canvas.height - 56;
+    ctx.fillStyle = "rgba(0,0,0,.28)";
+    ctx.fillRect(0, y, canvas.width, 56);
+
+    const E = inputs.E, W = inputs.W, C = inputs.C;
+
+    pixelText(`E:${E}  W:${W}  C:${C}`, 16, y+10, 14, "rgba(233,241,255,.85)");
+    pixelText(`spin:${speed.toFixed(2)} rad/s`, 16, y+30, 12, "rgba(151,167,194,.95)");
+
+    const msg =
+      (m === 0) ? "STOPPED (one input is 0)"
+      : (m >= 100) ? "PERFECT HALO"
+      : (struggling ? "Q2 STRUGGLE ACTIVE" : "FLOW");
+
+    const col =
+      (m === 0) ? "rgba(255,77,125,.92)"
+      : (m >= 100) ? "rgba(102,255,179,.92)"
+      : (struggling ? "rgba(255,77,125,.92)" : "rgba(95,247,255,.85)");
+
+    pixelText(msg, canvas.width - 16 - ctx.measureText(msg).width, y+18, 12, col);
+  }
+
+  // =========================
+  // UI updates
+  // =========================
+  function syncUI(inputs, m, speed, struggling) {
+    eShow.textContent = String(inputs.E);
+    wShow.textContent = String(inputs.W);
+    cShow.textContent = String(inputs.C);
+
+    const p = round(m);
+    momentumPct.textContent = `${p}%`;
+
+    let status = "building";
+    if (m === 0) status = "stopped";
+    else if (m >= 100) status = "perfect halo";
+    else if (m >= 70) status = "locked in";
+    else if (m >= 40) status = "pushing";
+    else status = "struggling";
+
+    statusEl.textContent = status;
+    speedOut.textContent = (m === 0) ? "0.00" : speed.toFixed(2);
+    struggleOut.textContent = (m === 0) ? "—" : (struggling ? "ON" : "OFF");
+  }
+
+  // =========================
+  // Animation loop
+  // =========================
+  function tick(t) {
+    const dt = Math.min(0.05, (t - lastT) / 1000);
+    lastT = t;
+
+    const inputs = readInputs();
+    // keep inputs clean
+    energy.value = String(inputs.E);
+    willpower.value = String(inputs.W);
+    concentration.value = String(inputs.C);
+
+    const m = computeMomentum(inputs);
+    const baseSpeed = speedFromMomentum(m);
+
+    // Q2 struggle: slow down + jitter when low momentum and in Q2
+    const inQ2 = isInQ2(angleTop);
+    const low = clamp(1 - (m/100), 0, 1);
+
+    // struggle factor only matters in Q2
+    let speed = baseSpeed;
+    let struggling = false;
+
+    if (m > 0 && inQ2) {
+      // The lower the momentum, the harsher the penalty in Q2
+      // still moves, unless m==0
+      const penalty = 1 - 0.78 * Math.pow(low, 1.35); // low m => big penalty
+      speed = baseSpeed * clamp(penalty, 0.12, 1);
+      struggling = (m < 55);
+      // add micro “gravity” wobble in Q2
+      if (struggling) {
+        const wobble = Math.sin(t / 80) * (0.03 + 0.10 * low);
+        speed = Math.max(0.05, speed + wobble);
+      }
+    }
+
+    // If any input is 0 => m=0 => speed=0 => ball stops
+    angleTop += speed * dt;
+    angleTop %= (Math.PI * 2);
+
+    // draw
+    clear();
+    drawPanel();
+    const ring = drawRing(m);
+    drawBall(ring, m, struggling);
+    drawFooter(m, speed, struggling, inputs);
+
+    syncUI(inputs, m, speed, struggling);
+
+    requestAnimationFrame(tick);
+  }
+
+  // =========================
+  // Generative retro synth soundtrack (varied, not a tiny loop)
+  // NOTE: Browsers require user interaction to start audio.
+  // This generator is semi-random and evolves so it doesn't get boring.
+  // =========================
+  let audio = {
+    ctx: null,
+    master: null,
+    playing: false,
+    muted: false,
+    timer: 0,
+    step: 0,
+    tempo: 128,
+    // nodes
+    lead1: null, lead2: null, bass: null,
+    hatGain: null, kickGain: null,
+    // for variation
+    root: 196,            // G3-ish
+    mode: [0, 2, 3, 7, 10], // minor-ish
+    pattern: [],
+    lastChange: 0
+  };
+
+  function randInt(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
+  function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function hzFrom(root, semis){ return root * Math.pow(2, semis/12); }
+
+  function makeNoiseBuffer(ctx, seconds){
+    const len = Math.floor(ctx.sampleRate * seconds);
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0;i<len;i++) data[i] = (Math.random()*2-1);
+    return buf;
+  }
+
+  function startAudio({muted=false} = {}) {
+    if (audio.playing) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    audio.ctx = ctx;
+
+    const master = ctx.createGain();
+    master.gain.value = muted ? 0.0 : 0.12;
+    master.connect(ctx.destination);
+    audio.master = master;
+    audio.muted = muted;
+
+    // Lead 1
+    const lead1 = ctx.createOscillator();
+    lead1.type = "sawtooth";
+    const g1 = ctx.createGain();
+    g1.gain.value = 0.050;
+    lead1.connect(g1).connect(master);
+    lead1.start();
+
+    // Lead 2 (detuned square)
+    const lead2 = ctx.createOscillator();
+    lead2.type = "square";
+    lead2.detune.value = 9;
+    const g2 = ctx.createGain();
+    g2.gain.value = 0.028;
+    lead2.connect(g2).connect(master);
+    lead2.start();
+
+    // Bass
+    const bass = ctx.createOscillator();
+    bass.type = "triangle";
+    const gb = ctx.createGain();
+    gb.gain.value = 0.070;
+    bass.connect(gb).connect(master);
+    bass.start();
+
+    // Hat (noise + highpass)
+    const noise = ctx.createBufferSource();
+    noise.buffer = makeNoiseBuffer(ctx, 0.25);
+    noise.loop = true;
+
+    const hp = ctx.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 6500;
+
+    const hatGain = ctx.createGain();
+    hatGain.gain.value = 0.0;
+
+    noise.connect(hp).connect(hatGain).connect(master);
+    noise.start();
+
+    // Kick (sine burst via gain)
+    const kickOsc = ctx.createOscillator();
+    kickOsc.type = "sine";
+    const kickGain = ctx.createGain();
+    kickGain.gain.value = 0.0;
+    kickOsc.connect(kickGain).connect(master);
+    kickOsc.start();
+
+    audio.lead1 = lead1;
+    audio.lead2 = lead2;
+    audio.bass = bass;
+    audio.hatGain = hatGain;
+    audio.kickGain = kickGain;
+    audio.kickOsc = kickOsc;
+
+    audio.playing = true;
+    audio.step = 0;
+    audio.tempo = 124 + randInt(0, 18); // slight tempo variability
+    audio.root = choose([174.61, 196, 220, 246.94]); // F3, G3, A3, B3-ish
+    audio.mode = choose([
+      [0,2,3,7,10],  // minor
+      [0,2,5,7,10],  // dorian-ish
+      [0,3,5,7,10],  // minor pentatonic
+      [0,2,3,5,7,10] // fuller minor
+    ]);
+    regeneratePattern();
+
+    scheduleStep();
+    updateAudioBtn();
+  }
+
+  function stopAudio() {
+    if (!audio.playing) return;
+    window.clearTimeout(audio.timer);
+    audio.timer = 0;
+    audio.playing = false;
+    try{
+      audio.lead1.stop();
+      audio.lead2.stop();
+      audio.bass.stop();
+      audio.kickOsc.stop();
+      audio.ctx.close();
+    }catch(e){}
+    audio.ctx = null;
+    updateAudioBtn();
+  }
+
+  function toggleMute() {
+    if (!audio.playing) return;
+    audio.muted = !audio.muted;
+    audio.master.gain.value = audio.muted ? 0.0 : 0.12;
+    updateAudioBtn();
+  }
+
+  function updateAudioBtn(){
+    if (!audio.playing) {
+      audioToggleBtn.textContent = "Audio: Off";
+      return;
+    }
+    audioToggleBtn.textContent = audio.muted ? "Audio: Muted" : "Audio: On";
+  }
+
+  function regeneratePattern(){
+    // Make an evolving 16-step melody + bass pattern (varied every ~6–14 seconds)
+    // so it doesn't feel like a tiny loop.
+    const steps = 16;
+    const pattern = [];
+    const base = audio.root;
+    const mode = audio.mode;
+
+    for (let i=0;i<steps;i++){
+      // probability of note at step
+      const density = choose([0.55, 0.62, 0.70, 0.78]);
+      const on = Math.random() < density;
+      const deg = choose(mode);
+      const octave = choose([0, 12, 12, 24]); // favor higher notes
+      const semis = deg + octave;
+      const vel = on ? choose([0.6,0.75,0.85,1.0]) : 0;
+
+      // bass simpler
+      const bassDeg = choose([0, mode[1] ?? 2, mode[3] ?? 7]);
+      const bassSemis = bassDeg - 12;
+
+      pattern.push({ on, semis, vel, bassSemis });
+    }
+
+    // Add a few "hits" for Tekken-ish flavor
+    for (let k=0;k<3;k++){
+      const idx = randInt(0,15);
+      pattern[idx].vel = 1.0;
+      pattern[idx].on = true;
+    }
+
+    audio.pattern = pattern;
+    audio.lastChange = performance.now();
+  }
+
+  function scheduleStep(){
+    if (!audio.playing) return;
+
+    const ctx = audio.ctx;
+    const t = ctx.currentTime;
+    const step = audio.step % 16;
+    const p = audio.pattern[step];
+
+    // Evolving changes
+    const now = performance.now();
+    if (now - audio.lastChange > (6000 + Math.random()*8000)) {
+      regeneratePattern();
+      // small tempo drift
+      audio.tempo = clamp(audio.tempo + randInt(-4,4), 118, 148);
+    }
+
+    // Lead notes
+    if (p.on) {
+      const f = hzFrom(audio.root, p.semis);
+      audio.lead1.frequency.setTargetAtTime(f, t, 0.01);
+      audio.lead2.frequency.setTargetAtTime(f*1.01, t, 0.01);
+    }
+
+    // Bass
+    const bf = hzFrom(audio.root, p.bassSemis);
+    audio.bass.frequency.setTargetAtTime(bf, t, 0.02);
+
+    // Hat on off-beats, with variation
+    const hatOn = (step % 2 === 1) || (Math.random() < 0.18);
+    audio.hatGain.gain.cancelScheduledValues(t);
+    audio.hatGain.gain.setValueAtTime(hatOn ? 0.040 : 0.0, t);
+    audio.hatGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+    // Kick on downbeats with some fills
+    const kickOn = (step === 0 || step === 8) || (Math.random() < 0.08);
+    if (kickOn) {
+      audio.kickOsc.frequency.setValueAtTime(120, t);
+      audio.kickGain.gain.setValueAtTime(0.0, t);
+      audio.kickGain.gain.linearRampToValueAtTime(0.10, t + 0.01);
+      audio.kickOsc.frequency.exponentialRampToValueAtTime(52, t + 0.12);
+      audio.kickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    }
+
+    audio.step++;
+
+    // 16th note timing
+    const stepMs = (60000 / audio.tempo) / 4;
+    audio.timer = window.setTimeout(scheduleStep, stepMs);
+  }
+
+  // =========================
+  // Events
+  // =========================
+  function sanitizeAndSync() {
+    const v = readInputs();
+    energy.value = String(v.E);
+    willpower.value = String(v.W);
+    concentration.value = String(v.C);
+    eShow.textContent = String(v.E);
+    wShow.textContent = String(v.W);
+    cShow.textContent = String(v.C);
+  }
+
+  energy.addEventListener("input", sanitizeAndSync);
+  willpower.addEventListener("input", sanitizeAndSync);
+  concentration.addEventListener("input", sanitizeAndSync);
+
+  randomBtn.addEventListener("click", () => {
+    energy.value = String(randInt(0,10));
+    willpower.value = String(randInt(0,10));
+    concentration.value = String(randInt(0,10));
+    sanitizeAndSync();
+  });
+
+  maxBtn.addEventListener("click", () => {
+    energy.value = "10";
+    willpower.value = "10";
+    concentration.value = "10";
+    sanitizeAndSync();
+  });
+
+  zeroBtn.addEventListener("click", () => {
+    // set one random input to 0
+    const which = choose(["E","W","C"]);
+    if (which === "E") energy.value = "0";
+    if (which === "W") willpower.value = "0";
+    if (which === "C") concentration.value = "0";
+    sanitizeAndSync();
+  });
+
+  audioToggleBtn.addEventListener("click", () => {
+    if (!audio.playing) {
+      // needs user gesture, this click is fine
+      startAudio({muted:false});
+      return;
+    }
+    // toggle mute (more useful than stopping)
+    toggleMute();
+  });
+
+  startBtn.addEventListener("click", () => {
+    startAudio({muted:false});
+    overlay.style.display = "none";
+  });
+
+  muteBtn.addEventListener("click", () => {
+    startAudio({muted:true});
+    overlay.style.display = "none";
+  });
+
+  // =========================
+  // Start
+  // =========================
+  sanitizeAndSync();
+  requestAnimationFrame(tick);
+
+  // =========================
+  // “Downloadable” note (you can save this file)
+  // =========================
+  // To make this downloadable: save this entire code as a file named:
+  // momentum_pixel_demo.html
+  // Then double-click it or open it in Chrome.
+})();
+</script>
+</body>
+</html>
